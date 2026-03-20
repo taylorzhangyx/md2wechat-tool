@@ -7,6 +7,24 @@ import (
 	"testing"
 )
 
+func chdirTemp(t *testing.T) string {
+	t.Helper()
+
+	orig, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd() error = %v", err)
+	}
+
+	tmp := t.TempDir()
+	if err := os.Chdir(tmp); err != nil {
+		t.Fatalf("Chdir() error = %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Chdir(orig)
+	})
+	return tmp
+}
+
 func TestLoadStyleAppliesDefaults(t *testing.T) {
 	tmpDir := t.TempDir()
 	stylePath := filepath.Join(tmpDir, "style.yaml")
@@ -81,7 +99,114 @@ func TestGetWritersDirPrefersExplicitEnvironmentVariable(t *testing.T) {
 	t.Setenv(writersDirEnvVar, customDir)
 
 	sm := NewStyleManager()
-	if got := sm.getWritersDir(); got != customDir {
-		t.Fatalf("getWritersDir() = %q, want %q", got, customDir)
+	if got := sm.GetWritersDir(); got != customDir {
+		t.Fatalf("GetWritersDir() = %q, want %q", got, customDir)
+	}
+}
+
+func TestLoadStylesFallsBackToBuiltinDanKoe(t *testing.T) {
+	chdirTemp(t)
+	t.Setenv(writersDirEnvVar, "")
+	t.Setenv("HOME", filepath.Join(t.TempDir(), "home"))
+
+	sm := NewStyleManager()
+	style, err := sm.GetDefaultStyle()
+	if err != nil {
+		t.Fatalf("GetDefaultStyle() error = %v", err)
+	}
+	if style.EnglishName != DefaultStyleName {
+		t.Fatalf("EnglishName = %q, want %q", style.EnglishName, DefaultStyleName)
+	}
+	if style.Name != "Dan Koe" {
+		t.Fatalf("Name = %q, want Dan Koe", style.Name)
+	}
+}
+
+func TestLoadStylesRespectsPriorityOrder(t *testing.T) {
+	tmp := chdirTemp(t)
+	homeDir := filepath.Join(tmp, "home")
+	configDir := filepath.Join(homeDir, ".config", "md2wechat", "writers")
+	legacyDir := filepath.Join(homeDir, ".md2wechat-writers")
+	cwdDir := filepath.Join(tmp, "writers")
+	envDir := filepath.Join(tmp, "env-writers")
+
+	for _, dir := range []string{configDir, legacyDir, cwdDir, envDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatalf("MkdirAll(%s) error = %v", dir, err)
+		}
+	}
+
+	t.Setenv("HOME", homeDir)
+	t.Setenv(writersDirEnvVar, envDir)
+
+	writeStyle := func(dir, description string) {
+		t.Helper()
+		content := strings.Join([]string{
+			`english_name: dan-koe`,
+			`name: ` + description,
+			`description: ` + description,
+			`writing_prompt: Prompt for ` + description,
+		}, "\n")
+		if err := os.WriteFile(filepath.Join(dir, "dan-koe.yaml"), []byte(content), 0644); err != nil {
+			t.Fatalf("WriteFile(%s) error = %v", dir, err)
+		}
+	}
+
+	writeStyle(legacyDir, "legacy-home")
+	writeStyle(configDir, "config-home")
+	writeStyle(cwdDir, "cwd")
+	writeStyle(envDir, "env")
+
+	sm := NewStyleManager()
+	style, err := sm.GetDefaultStyle()
+	if err != nil {
+		t.Fatalf("GetDefaultStyle() error = %v", err)
+	}
+	if style.Description != "env" {
+		t.Fatalf("Description = %q, want env", style.Description)
+	}
+	if style.WritingPrompt != "Prompt for env" {
+		t.Fatalf("WritingPrompt = %q, want Prompt for env", style.WritingPrompt)
+	}
+}
+
+func TestLoadStylesFallsBackThroughUserDirsBeforeBuiltin(t *testing.T) {
+	tmp := chdirTemp(t)
+	homeDir := filepath.Join(tmp, "home")
+	configDir := filepath.Join(homeDir, ".config", "md2wechat", "writers")
+	legacyDir := filepath.Join(homeDir, ".md2wechat-writers")
+
+	for _, dir := range []string{configDir, legacyDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatalf("MkdirAll(%s) error = %v", dir, err)
+		}
+	}
+
+	t.Setenv("HOME", homeDir)
+	t.Setenv(writersDirEnvVar, "")
+
+	writeStyle := func(dir, description string) {
+		t.Helper()
+		content := strings.Join([]string{
+			`english_name: dan-koe`,
+			`name: ` + description,
+			`description: ` + description,
+			`writing_prompt: Prompt for ` + description,
+		}, "\n")
+		if err := os.WriteFile(filepath.Join(dir, "dan-koe.yaml"), []byte(content), 0644); err != nil {
+			t.Fatalf("WriteFile(%s) error = %v", dir, err)
+		}
+	}
+
+	writeStyle(legacyDir, "legacy-home")
+	writeStyle(configDir, "config-home")
+
+	sm := NewStyleManager()
+	style, err := sm.GetDefaultStyle()
+	if err != nil {
+		t.Fatalf("GetDefaultStyle() error = %v", err)
+	}
+	if style.Description != "config-home" {
+		t.Fatalf("Description = %q, want config-home", style.Description)
 	}
 }

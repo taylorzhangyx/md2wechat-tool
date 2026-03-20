@@ -830,6 +830,14 @@ image:
 - 配置文件：`api.md2wechat_base_url`
 - 环境变量：`MD2WECHAT_BASE_URL`
 
+默认主题和默认写作风格已经内置在二进制里。
+如果你要覆盖它们，优先级从高到低是：
+
+- `MD2WECHAT_THEMES_DIR` / `MD2WECHAT_WRITERS_DIR`
+- 当前项目目录下的 `themes/` / `writers/`
+- `~/.config/md2wechat/themes/` / `~/.config/md2wechat/writers/`
+- 二进制内置默认资产
+
 更完整的保姆级说明见：
 
 - [配置指南](docs/CONFIG.md)

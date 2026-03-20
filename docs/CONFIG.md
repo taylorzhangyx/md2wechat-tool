@@ -140,6 +140,45 @@ md2wechat convert article.md --mode api
 
 ---
 
+## 内置资产
+
+当前仓库把官方默认 `themes` 和默认 `writer style` 随二进制一起提供。
+这意味着即使 Agent 服务器上没有仓库目录，默认主题和默认写作风格也应该可用。
+
+### 主题加载顺序
+
+`themes` 的优先级从高到低如下：
+
+1. `MD2WECHAT_THEMES_DIR`
+2. 当前项目目录下的 `themes/`
+3. `~/.config/md2wechat/themes/`
+4. 二进制内置的官方默认 themes
+
+同名主题以前面的来源覆盖后面的来源。
+
+### 写作风格加载顺序
+
+`writers` 的优先级从高到低如下：
+
+1. `MD2WECHAT_WRITERS_DIR`
+2. 当前项目目录下的 `writers/`
+3. `~/.config/md2wechat/writers/`
+4. `~/.md2wechat-writers/`
+5. 二进制内置的默认 writer style
+
+同名写作风格同样以前面的来源覆盖后面的来源。
+
+### 什么时候改哪里
+
+如果你想：
+
+- 仅当前项目生效，放到项目目录
+- 所有项目都生效，放到 `~/.config/md2wechat/...`
+- Agent 服务器显式指定，设置 `MD2WECHAT_THEMES_DIR` 或 `MD2WECHAT_WRITERS_DIR`
+- 保持官方默认不变，直接用内置资产
+
+---
+
 ## 配置文件搜索顺序
 
 程序会按以下顺序查找配置文件：
@@ -255,6 +294,8 @@ image:
 | `COMPRESS_IMAGES` | `image.compress` |
 | `MAX_IMAGE_WIDTH` | `image.max_width` |
 | `MAX_IMAGE_SIZE` | `image.max_size_mb` |
+| `MD2WECHAT_THEMES_DIR` | `themes` 覆盖目录 |
+| `MD2WECHAT_WRITERS_DIR` | `writers` 覆盖目录 |
 
 ---
 
@@ -355,3 +396,4 @@ md2wechat config validate
 - [安装指南](INSTALL.md)
 - [图片服务配置](IMAGE_PROVISIONERS.md)
 - [真实烟雾测试记录](SMOKE.md)
+- [内置资产](#内置资产)

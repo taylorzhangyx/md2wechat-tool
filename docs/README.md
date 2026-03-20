@@ -35,6 +35,7 @@
 ## 能力专题
 
 - [配置说明](CONFIG.md)
+- [内置资产](CONFIG.md#内置资产)
 - [真实烟雾测试记录](SMOKE.md)
 - [图片服务配置](IMAGE_PROVISIONERS.md)
 - [OpenClaw 指南](OPENCLAW.md)

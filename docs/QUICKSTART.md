@@ -60,6 +60,9 @@ api:
   md2wechat_base_url: "https://md2wechat.app"
 ```
 
+默认主题和默认写作风格已经随二进制内置，不需要额外拷贝 `themes/` 或 `writers/` 目录。
+如果你要自定义它们，按优先级放到项目目录、`~/.config/md2wechat/...`，或者显式设置 `MD2WECHAT_THEMES_DIR` / `MD2WECHAT_WRITERS_DIR`。
+
 ### 3. 预览 Markdown
 
 ```bash

@@ -54,6 +54,14 @@ Default conversion mode:
 - If the user does not explicitly pass `--mode`, `convert` should be treated as `api`
 - Only use AI mode when the user explicitly asks for `--mode ai` or clearly requests AI themed conversion
 
+Built-in assets:
+
+- Default themes and the default writer style are bundled with the binary
+- Prefer `MD2WECHAT_THEMES_DIR` / `MD2WECHAT_WRITERS_DIR` for explicit overrides
+- Then check the project-local `themes/` / `writers/` directories
+- Then check `~/.config/md2wechat/themes/` / `~/.config/md2wechat/writers/`
+- Do not assume the repository directory exists on the agent host
+
 ### Natural Language Image Generation
 
 You can also ask me to generate images using natural language:
