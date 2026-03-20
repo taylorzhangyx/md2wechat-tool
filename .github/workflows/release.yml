@@ -192,9 +192,10 @@ jobs:
 
           & (Join-Path $bundleDir 'install.ps1')
 
-          $versionOutput = & (Join-Path $installDir 'md2wechat.exe') version --json
+          $versionOutput = & (Join-Path $installDir 'md2wechat.exe') version --json | Out-String
           $versionOutput
-          if ($versionOutput -notmatch '"version":\s*"' + [regex]::Escape($env:VERSION) + '"') {
+          $versionData = $versionOutput | ConvertFrom-Json
+          if ($versionData.data.version -ne $env:VERSION) {
             throw "installed PowerShell binary version mismatch"
           }
 
