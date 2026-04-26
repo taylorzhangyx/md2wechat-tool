@@ -20,10 +20,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`internal/layoutcatalog` package**: schema, loader, renderer, validator with 20+ unit tests
 - **Integration test fixtures**: 3 article shapes (opinion-piece, data-report, mixed-with-unknown)
 - **E2E test suite**: gated by MD2WECHAT_E2E=1, validates each module's example against /api/convert
+- **`docs/LAYOUT.md`**: 保姆级高级排版模块教程，覆盖全部 43 个模块的字段说明、使用场景、示例和常见错误
+
+### Fixed
+- **9 YAML module field doc errors** (`sprint4` category): corrected JSON key names in YAML field documentation so Agents no longer generate wrong keys at render time
+  - `quote-card`: `quote`/`content` → `text`
+  - `tweet`: `content`→`text`, `author`→`name`, `date`→`timestamp`
+  - `definition`: added `term`/`def`/`termLabel` fields, anti_pattern clarifies `def` not `definition`
+  - `stat-row`, `question`, `resource-list`, `comparison-table`, `changelog`: replaced misleading pipe-format rows with correct JSON object field docs
+
+### Changed
+- **SKILL.md (both Claude Code and OpenClaw)**: added API-mode-only blockquote for layout modules; removed `https://www.md2wechat.cn` URL from public skill files (security); added gentle AI→API nudge rule
+- **AGENTS.md / .github/copilot-instructions.md**: added layout API-only constraint notes (internal dev docs, URL retained)
+- **Docs version references**: bumped `v2.0.7` → `v2.1.0` across `QUICKSTART.md`, `USAGE.md`, `FAQ.md`, `INSTALL.md`
 
 ### Technical Details
 - **New Package**: `internal/layoutcatalog` (schema.go, loader.go, renderer.go, validator.go)
-- **New Files**: `internal/assets/builtin/layout/**/*.yaml` (43 module definitions)
+- **New Files**: `internal/assets/builtin/layout/**/*.yaml` (43 module definitions), `docs/LAYOUT.md`
 - **New Commands**: `cmd/md2wechat/layout.go`, `cmd/md2wechat/layout_test.go`, `cmd/md2wechat/layout_e2e_test.go`
 - **New Test Data**: `internal/layoutcatalog/testdata/integration/`
 - **Error Codes**: LAYOUT_MODULE_NOT_FOUND, LAYOUT_INVALID_FILTER, LAYOUT_MISSING_REQUIRED_FIELD, LAYOUT_INVALID_FIELD_VALUE, LAYOUT_VALIDATE_HAS_ERRORS, LAYOUT_VALIDATED

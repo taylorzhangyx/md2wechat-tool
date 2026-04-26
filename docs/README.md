@@ -37,6 +37,7 @@
 
 ## 能力专题
 
+- [**高级排版模块教程（保姆级）**](LAYOUT.md) ← API 模式专属，43 个模块
 - [配置说明](CONFIG.md)
 - [微信凭证与 IP 白名单指南](WECHAT-CREDENTIALS.md)
 - [能力发现与 Prompt Catalog](DISCOVERY.md)

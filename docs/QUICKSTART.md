@@ -19,13 +19,13 @@ brew install geekjourneyx/tap/md2wechat
 如果你不用 Homebrew，再执行：
 
 ```bash
-curl -fsSL https://github.com/geekjourneyx/md2wechat-skill/releases/download/v2.0.7/install.sh | bash
+curl -fsSL https://github.com/geekjourneyx/md2wechat-skill/releases/download/v2.1.0/install.sh | bash
 ```
 
 Windows PowerShell：
 
 ```powershell
-$env:MD2WECHAT_RELEASE_BASE_URL = "https://github.com/geekjourneyx/md2wechat-skill/releases/download/v2.0.7"
+$env:MD2WECHAT_RELEASE_BASE_URL = "https://github.com/geekjourneyx/md2wechat-skill/releases/download/v2.1.0"
 iex ((New-Object System.Net.WebClient).DownloadString("$env:MD2WECHAT_RELEASE_BASE_URL/install.ps1"))
 ```
 
@@ -141,8 +141,9 @@ md2wechat create_image_post --title "Weekend Trip" --images a.jpg,b.jpg --dry-ru
 
 1. [安装指南](INSTALL.md)
 2. [完整使用说明](USAGE.md)
-3. [故障排查](TROUBLESHOOTING.md)
-4. [架构说明](ARCHITECTURE.md)
+3. [高级排版模块教程](LAYOUT.md) ← API 模式专属功能
+4. [故障排查](TROUBLESHOOTING.md)
+5. [架构说明](ARCHITECTURE.md)
 
 ## 不再作为主路径的内容
 

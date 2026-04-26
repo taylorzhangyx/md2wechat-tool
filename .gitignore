@@ -58,3 +58,6 @@ build/
 coverage.txt
 coverage.html
 /skills/md2wechat/scripts/md2wechat
+
+.cache/
+docs/superpowers/

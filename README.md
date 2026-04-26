@@ -5,7 +5,7 @@
   md2wechat
 </h1>
 
-<img src="assets/readme-cover.webp" alt="md2wechat" width="520" />
+<img src="assets/readme-header.gif" alt="md2wechat – Markdown to WeChat" width="720" />
 
 **用 Markdown 写公众号文章，像发朋友圈一样简单**
 
