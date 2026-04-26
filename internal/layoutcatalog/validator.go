@@ -86,7 +86,19 @@ func (c *Catalog) validateBlock(name string, body []string, line int, r *Validat
 				})
 			}
 		}
-		for _, f := range append(spec.Fields.Required, spec.Fields.Optional...) {
+		for _, f := range spec.Fields.Required {
+			if v, ok := present[f.Name]; ok && v != "" {
+				if err := checkEnum(f, v); err != nil {
+					r.Errors = append(r.Errors, ValidationIssue{
+						Module:  name,
+						Field:   f.Name,
+						Line:    line,
+						Message: err.Error(),
+					})
+				}
+			}
+		}
+		for _, f := range spec.Fields.Optional {
 			if v, ok := present[f.Name]; ok && v != "" {
 				if err := checkEnum(f, v); err != nil {
 					r.Errors = append(r.Errors, ValidationIssue{

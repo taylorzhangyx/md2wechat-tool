@@ -72,12 +72,20 @@ func renderRows(spec *LayoutSpec, vars map[string]any) (string, error) {
 			if !ok || val == "" {
 				return "", fmt.Errorf("%w: %s.%s", ErrMissingRequiredField, spec.Name, f.Name)
 			}
+			if err := checkEnum(f, val); err != nil {
+				return "", err
+			}
 			fmt.Fprintf(&b, "%s: %s\n", f.Name, val)
 		}
 		for _, f := range spec.Fields.Optional {
-			if val, ok := lookupString(vars, f.Name); ok && val != "" {
-				fmt.Fprintf(&b, "%s: %s\n", f.Name, val)
+			val, ok := lookupString(vars, f.Name)
+			if !ok || val == "" {
+				continue
 			}
+			if err := checkEnum(f, val); err != nil {
+				return "", err
+			}
+			fmt.Fprintf(&b, "%s: %s\n", f.Name, val)
 		}
 	}
 
