@@ -59,7 +59,7 @@
 扫描下方二维码关注 **极客杰尼** 公众号 → 备注 **「API咨询」** 联系作者；或备注 **「交流群」** 申请加入用户交流群，和同类创作者一起探索 AI 驱动的公众号创作。
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/geekjourneyx/awesome-developer-go-sail/main/docs/assets/qrcode.jpg" alt="公众号：极客杰尼" width="160" />
+<img src="assets/wechat.png" alt="公众号：极客杰尼" width="160" />
 </p>
 
 ---
@@ -347,7 +347,7 @@ AI 模式返回一个结构化排版 prompt，需要 Claude / Codex 继续处理
 **欢迎加入微信交流群** — 扫码关注公众号，备注 **「交流群」** 申请入群；备注 **「API咨询」** 申请 API 服务：
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/geekjourneyx/awesome-developer-go-sail/main/docs/assets/qrcode.jpg" alt="公众号：极客杰尼" width="160" />
+<img src="assets/wechat.png" alt="公众号：极客杰尼" width="160" />
 </p>
 
 ---
