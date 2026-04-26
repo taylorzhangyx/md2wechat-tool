@@ -4,7 +4,7 @@
 VERSION ?= $(shell tr -d '[:space:]' < VERSION)
 LDFLAGS := -s -w -X main.Version=$(VERSION)
 
-.PHONY: all build clean test install help lint fmt vet release release-check deps quality-gates
+.PHONY: all build clean test install help lint fmt vet release release-check deps quality-gates e2e-layout
 
 # 默认目标
 all: build
@@ -82,6 +82,11 @@ release-check:
 # 本地/CI 统一质量门
 quality-gates:
 	@bash scripts/quality-gates.sh
+
+# E2E: layout module catalog vs /api/convert consistency (requires running server)
+e2e-layout:
+	MD2WECHAT_E2E=1 MD2WECHAT_BASE_URL=$${MD2WECHAT_BASE_URL:-http://localhost:3000} \
+		go test ./cmd/md2wechat -run E2E -v
 
 # 安装到 GOPATH/bin
 install:
