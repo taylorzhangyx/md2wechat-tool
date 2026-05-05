@@ -387,6 +387,7 @@ curl -fsSL https://github.com/geekjourneyx/md2wechat-skill/releases/download/v2.
 | [配置指南](docs/CONFIG.md) | 配置文件与环境变量完整说明 |
 | [图片服务配置](docs/IMAGE_PROVISIONERS.md) | AI 图片生成服务配置 |
 | [微信凭证指南](docs/WECHAT-CREDENTIALS.md) | AppID / Secret / IP 白名单 |
+| [微信渲染 knowhow](docs/WECHAT_RENDERING.md) | `--mode local` 的设计依据、微信 sanitizer 白名单实证、每个设计决策的由来 |
 | [常见问题](docs/FAQ.md) | 20+ 问题解答 |
 | [故障排查](docs/TROUBLESHOOTING.md) | 遇到问题看这里 |
 | [OpenClaw 指南](docs/OPENCLAW.md) | OpenClaw 平台安装与配置 |
