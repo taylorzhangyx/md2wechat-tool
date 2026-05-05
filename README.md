@@ -217,7 +217,88 @@ md2wechat layout list --json               # 高级排版模块列表
 
 ---
 
-## AI 模式 vs API 模式
+## Local 模式 vs AI 模式 vs API 模式
+
+**默认是 Local 模式**——完全在本地跑 markdown → HTML，不依赖任何远端服务。稳定、离线、无需凭证（除非要上传到微信）。
+
+| | Local 模式（默认，本地） | AI 模式（免费） | API 模式（专业） |
+|---|---|---|---|
+| **是否需要 API Key** | 不需要 | 不需要 | 需要 |
+| **是否联网** | 不联网（除非发草稿） | 需要 LLM | 需要 md2wechat.cn |
+| **输出方式** | 本地 goldmark 渲染 + 规则增强 | 生成 prompt 给 LLM | 远端 API 返回 HTML |
+| **内置主题** | `minimal-green` | 3 个 | 40+ 个 |
+| **Obsidian `![[img.png]]`** | ✅ 自动解析 | ❌ | ❌ |
+| **输出一致性** | 完全确定 | 每次不同 | 确定性 |
+| **适合场景** | 日常写作发布（推荐） | 实验、多主题探索 | 品牌内容 |
+
+```bash
+# Local 模式（默认）—— 离线跑通，minimal-green 主题
+md2wechat convert article.md --output preview.html
+
+# 关闭规则增强（TL;DR callout 和章末 takeaway 升级）
+md2wechat convert article.md --no-enhance
+
+# AI 模式（--mode ai，不需要 API Key）
+md2wechat convert article.md --mode ai --theme autumn-warm --preview
+
+# API 模式（需要 API Key）
+md2wechat convert article.md --mode api --theme minimal-blue --preview
+```
+
+### Local 模式的两条排版增强规则
+
+默认自动识别这两个常见模式，你在 markdown 里照常写不用学任何新语法：
+
+1. **TL;DR callout**：行首 `太长不看版：` / `TL;DR:` / `一句话总结：` 独占一行，会被升级成 `<p><strong>太长不看版</strong></p>` 的加粗标签；紧跟的段落或表格原样保留。
+2. **章末 takeaway 引用**：一行 `> 小结文字` 后面紧跟 `---` / `## ` / 文末，会被渲染成 `<blockquote><p><strong>…</strong></p></blockquote>`（原生 blockquote 外观 + 加粗强调）。普通多行讨论引用不触发。
+
+不想要就加 `--no-enhance`。
+
+> **为什么样式克制？**微信订阅号草稿接口会剥掉几乎所有的 inline CSS 和 `<section>` / `<div>` 的样式，还会 unwrap `<div>`。本地预览和微信实际渲染会有一道视觉鸿沟——我们选择只用微信白名单内的标签（`p` / `strong` / `blockquote` / `table` / `hr` / `img`）表达结构，让效果在微信里能真的落地。
+
+### 外链改写：`--link-style`
+
+微信**未认证订阅号**的草稿接口会默认剥掉所有站外 `<a href>`，只留锚文本。为了让读者拿得到 URL，我们默认在 markdown 进入渲染器之前改写链接。三种策略：
+
+- `--link-style=inline`（**默认**）：`[text](URL)` → `text（URL）`，简单直接。适合链接少、偶尔穿插的文章。
+- `--link-style=footnote`：正文里换成 `text[N]`，文末生成统一编号列表 `[1] text — URL`。如果 markdown 已经有 `## Reference` / `## 参考` 这类段落，会**替换**这个段落的正文而不是追加新段。适合 Reference 段密集的技术/学术文章。脚注用 `<p>` + `<br/>` 而不是 `<ul><li>`，避免微信对列表渲染插空 li 的 quirk。
+- `--link-style=native`：保留 `<a href>`。仅当你的公众号是**已认证且开通微信支付**的账号、或只用来做本地预览时用。
+
+```bash
+# 未认证订阅号、链接稀疏（默认即可）
+md2wechat convert article.md --upload --draft --cover cover.png
+
+# 链接密集，想要文末统一参考列表
+md2wechat convert article.md --upload --draft --cover cover.png --link-style=footnote
+
+# 已认证号，想保留可点击的超链接
+md2wechat convert article.md --upload --draft --cover cover.png --link-style=native
+```
+
+### 代码块保真
+
+微信的编辑器会把连续空格合并成 1 个、把 `\n` 当普通换行丢掉，所以裸 `<pre><code>` 会把多行代码挤成一坨。我们在代码块里：
+
+- 每个半角空格 → `&nbsp;`（不可断空格，微信保留）
+- 每个 tab → 4 个 `&nbsp;`
+- 每个 `\n` → `<br/>`
+
+结果是代码在微信里保持原样缩进和换行。这套方案对 `--link-style` 没有依赖，所有模式下都生效。
+
+### WeChat 凭证自动加载
+
+项目根目录放一个 `.env`（已在 `.gitignore` 里）：
+
+```bash
+export WECHAT_APPID=wx...
+export WECHAT_SECRET=...
+```
+
+下一次执行 `md2wechat convert --upload --draft` 时会自动读取。真实 shell 环境变量优先级更高，不会被覆盖。
+
+---
+
+## AI 模式 vs API 模式（legacy 对照）
 
 | | AI 模式（免费） | API 模式（专业） |
 |---|---|---|
@@ -233,8 +314,8 @@ md2wechat layout list --json               # 高级排版模块列表
 # AI 模式（--mode ai，不需要 API Key）
 md2wechat convert article.md --mode ai --theme autumn-warm --preview
 
-# API 模式（默认，需要 API Key）
-md2wechat convert article.md --preview
+# API 模式（需要 API Key）
+md2wechat convert article.md --mode api --preview
 ```
 
 ---

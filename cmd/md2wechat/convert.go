@@ -88,12 +88,14 @@ var (
 	convertTitle          string
 	convertAuthor         string
 	convertDigest         string
+	convertNoEnhance      bool
+	convertLinkStyle      string
 )
 
 func init() {
 	// 添加 flags
-	convertCmd.Flags().StringVar(&convertMode, "mode", "api", "Conversion mode: api or ai")
-	convertCmd.Flags().StringVar(&convertTheme, "theme", "default", "Theme name")
+	convertCmd.Flags().StringVar(&convertMode, "mode", "local", "Conversion mode: local (default, offline) / api / ai")
+	convertCmd.Flags().StringVar(&convertTheme, "theme", "minimal-green", "Theme name")
 	convertCmd.Flags().StringVar(&convertAPIKey, "api-key", "", "API key for md2wechat.cn")
 	convertCmd.Flags().StringVar(&convertFontSize, "font-size", "medium", "Font size: small/medium/large (API mode only)")
 	convertCmd.Flags().StringVar(&convertBackgroundType, "background-type", "none", "Background type: default/grid/none (API mode only)")
@@ -108,6 +110,8 @@ func init() {
 	convertCmd.Flags().StringVar(&convertTitle, "title", "", "Override article title (max 32 characters)")
 	convertCmd.Flags().StringVar(&convertAuthor, "author", "", "Override article author (max 16 characters)")
 	convertCmd.Flags().StringVar(&convertDigest, "digest", "", "Override article digest (max 128 characters)")
+	convertCmd.Flags().BoolVar(&convertNoEnhance, "no-enhance", false, "Disable layout enhancement rules (TL;DR callout, chapter takeaway) — local mode only")
+	convertCmd.Flags().StringVar(&convertLinkStyle, "link-style", "inline", "Link rendering: inline (text（url），default, safe for any account), footnote (text[N] + 末尾列表), or native (keep <a href>, verified accounts only) — local mode only")
 }
 
 // runConvert 执行转换
@@ -170,6 +174,9 @@ func runConvert(cmd *cobra.Command, args []string) error {
 			FontSize:       convertFontSize,
 			BackgroundType: convertBackgroundType,
 			CustomPrompt:   convertCustomPrompt,
+			BaseDir:        filepath.Dir(markdownFile),
+			NoEnhance:      convertNoEnhance,
+			LinkStyle:      convertLinkStyle,
 		},
 		MarkdownDir:    filepath.Dir(markdownFile),
 		OutputFile:     convertOutput,
@@ -296,7 +303,7 @@ func resolveAIPromptOutputPath(outputPath string) string {
 
 func validateConvertConfig() error {
 	switch convertMode {
-	case "", "api", "ai":
+	case "", "api", "ai", "local":
 	default:
 		return newCLIError(codeConvertInvalid, fmt.Sprintf("invalid convert mode: %s", convertMode))
 	}
@@ -305,6 +312,12 @@ func validateConvertConfig() error {
 		if convertAPIKey == "" && cfg.MD2WechatAPIKey == "" {
 			return newCLIError(codeConvertInvalid, "MD2WECHAT_API_KEY is required for API mode")
 		}
+	}
+
+	switch convertLinkStyle {
+	case "", "inline", "footnote", "native":
+	default:
+		return newCLIError(codeConvertInvalid, fmt.Sprintf("invalid --link-style: %s (expected inline, footnote, or native)", convertLinkStyle))
 	}
 
 	if convertUpload || convertDraft {

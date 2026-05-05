@@ -105,9 +105,13 @@ func Load() (*Config, error) {
 
 // LoadWithDefaults 使用指定配置文件路径加载配置
 func LoadWithDefaults(configPath string) (*Config, error) {
+	// 先尝试加载 .env，以便后续的 env 读取能拿到写作者放在项目根目录
+	// 的 WECHAT_APPID / WECHAT_SECRET 等凭证。真实 env 始终优先。
+	loadDotenv()
+
 	cfg := &Config{
-		DefaultConvertMode:    "api",
-		DefaultTheme:          "default",
+		DefaultConvertMode:    "local",
+		DefaultTheme:          "minimal-green",
 		DefaultBackgroundType: "none",
 		MD2WechatBaseURL:      "https://www.md2wechat.cn",
 		CompressImages:        true,
@@ -409,11 +413,13 @@ func (c *Config) Validate() error {
 
 func (c *Config) validateCommon() error {
 	// 验证转换模式
-	if c.DefaultConvertMode != "api" && c.DefaultConvertMode != "ai" {
+	switch c.DefaultConvertMode {
+	case "api", "ai", "local":
+	default:
 		return &ConfigError{
 			Field:   "ConvertMode",
-			Message: "转换模式必须是 'api' 或 'ai'",
-			Hint:    "配置文件中设置 api.convert_mode: api",
+			Message: "转换模式必须是 'local'、'api' 或 'ai'",
+			Hint:    "配置文件中设置 api.convert_mode: local",
 		}
 	}
 

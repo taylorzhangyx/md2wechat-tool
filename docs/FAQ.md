@@ -2,6 +2,62 @@
 
 这份 FAQ 只回答一件事：**新手最常卡在哪里，最快怎么排掉。**
 
+## Local 模式相关（v2.x 新增）
+
+**Q: 默认 `--mode local` 是什么？和之前的 api/ai 有什么区别？**
+
+A: Local 是本地渲染：markdown → HTML 完全在你机器上跑，不调任何远端 API。目前只支持一个主题 `minimal-green`。优点是稳定、离线、零凭证。其他 40+ 主题仍然要 `--mode api`。
+
+**Q: 我的 Obsidian 图片 `![[Pasted image xxx.png]]` 渲染不出来？**
+
+A: CLI 会从 markdown 文件所在目录开始往上找，每一级都检查 `<filename>`、`attachments/<filename>`、`Attachments/<filename>`。最多往上找 6 级，或者遇到 `.obsidian/` 目录停下来。如果还找不到会 WARN 并保留原始 `![[xxx]]`，不崩溃。
+
+**Q: TL;DR callout 和章末 takeaway 怎么关？**
+
+A: 加 `--no-enhance`。两条规则默认开启，规则命中会在 HTML 里插 `<!-- md2wechat: enhanced by rule=xxx -->` 注释，方便你审稿。
+
+**Q: 项目根目录的 `.env` 会被自动读吗？**
+
+A: 会。`./.env` → `./.env.local` → `~/.config/md2wechat/.env` 按顺序查找；已经在 shell 里的 env 变量不会被覆盖。`.env` 已加入 `.gitignore`。
+
+**Q: 为什么本地预览 HTML 有绿色主题、pill 徽章、takeaway 深绿底，一发到微信全没了？**
+
+A: 微信订阅号的草稿接口是强 sanitizer：它会**剥掉几乎所有 inline `style` 属性**，还会把 `<section>` 的 style 剥光、把 `<div>` 直接 unwrap 成 `<p>`。所以 `minimal-green` 主题的装饰在微信里基本保不住。我们承认这点——从 v2.x 起改用微信白名单里能活下来的标签（`<p><strong>…</strong></p>` 做 TL;DR 标签，`<blockquote><p><strong>…</strong></p></blockquote>` 做 takeaway），保证结构和加粗能在微信里留下来。本地预览依然是有颜色的，用来校对视觉；微信里是"素颜但结构正确"。
+
+**Q: 发完草稿一看，Reference 列表和正文的所有超链接都没了 URL，只剩锚文本，怎么办？**
+
+A: 两种可能：
+1. 你的公众号是**未认证订阅号**——微信强制剥站外 `<a href>`，这是平台策略不是 CLI 的 bug。
+2. 默认 `--link-style=inline` 已经把 `[text](URL)` 改写成 `text（URL）`，URL 以纯文本形式出现在正文里，读者能复制但不能直接点。这是稳妥方案。
+
+已认证账号想恢复可点击超链接，加 `--link-style=native`：
+
+```bash
+md2wechat convert article.md --upload --draft --cover cover.png --link-style=native
+```
+
+**Q: 文章链接多，inline 模式每条 `text（URL）` 好冗余，能做成脚注吗？**
+
+A: 可以。`--link-style=footnote` 把正文里 `[text](URL)` 换成 `text[N]`，然后在文末生成一段 `[1] text — URL` 的参考列表。如果你的 markdown 已经有 `## Reference` / `## 参考链接` / `## 参考` / `## 参考资料` / `## 参考文献` / `## 延伸阅读` 这类 heading，**会直接替换那段的正文**——heading 保留、原手写 bullet 列表没了、新的连续编号列表接上。避免两个 URL 列表并存互相拆台。
+
+```bash
+md2wechat convert article.md --upload --draft --cover cover.png --link-style=footnote
+```
+
+**Q: Reference 段每条 bullet 前面多一行空的，怎么回事？**
+
+A: 微信订阅号默认会给每个 `<li>` 前面插一个空的 `<li>` 兄弟（大概是它们 CSS 自己加的间距），和 URL 无关。`--link-style=footnote` 默认用 `<p>` + `<br/>` 渲染参考列表而不是 `<ul><li>`，绕开了这个 quirk。如果你非要用标准 markdown `- item` 列表，这个空行没法避免。
+
+**Q: 代码块在微信里挤成一坨，缩进全没了？**
+
+A: 微信编辑器对 `<pre><code>` 里的空格和 `\n` 会做"规范化"处理——连续空格合并成 1 个、`\n` 按普通换行丢掉。从 v3 起，我们在代码块里把空格换成 `&nbsp;`、`\n` 换成 `<br/>`，tab 展开成 4 个 `&nbsp;`。所以多行代码和缩进都能在微信里保留原样。
+
+**Q: 文章顶部标题显示了两次，怎么回事？**
+
+A: v2.x 之前的 bug——微信草稿 API 会把你传的 `title` 字段渲染在文章页顶部，如果你 markdown 的第一行也是 `# 同样的标题`，就会出现两次。v2.x 起会自动剥掉与元数据 title 完全匹配的首行 h1。如果还看到重复，确认 `--title` 传的值和你 md 首行完全一致（包括标点）。
+
+---
+
 如果你是第一次接触 `md2wechat`，推荐先看这些文档：
 
 - [安装指南](INSTALL.md)

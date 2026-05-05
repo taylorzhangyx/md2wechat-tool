@@ -4,6 +4,18 @@
 
 这组命令的定位不是替代 `--help`，而是提供**可机读、可枚举、可提前探测**的能力接口。
 
+## Convert 模式
+
+`md2wechat convert` 目前支持三种模式：
+
+| mode | 说明 | 外部依赖 |
+|---|---|---|
+| `local`（默认） | 本地 goldmark 渲染 + 内联样式，内置 `minimal-green` 主题。默认开启两条排版增强：TL;DR callout、章末 takeaway。自动解析 Obsidian `![[img.png]]` 嵌入。 | 无 |
+| `api` | POST 到 `md2wechat.cn`，服务端返回 HTML。支持 40+ 主题。 | 需要 `MD2WECHAT_API_KEY` |
+| `ai` | 产出 prompt，由外部 LLM 继续处理 HTML。 | 需要 LLM 执行层 |
+
+`--no-enhance` 关闭 local 模式的规则增强，退回到纯机械翻译。
+
 ## 推荐顺序
 
 对于 Agent、脚本或 CI，建议按下面的顺序使用：

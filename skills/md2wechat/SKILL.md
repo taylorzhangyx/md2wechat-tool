@@ -29,7 +29,7 @@ Choose the command family before doing any publish action:
 - Assume `md2wechat` is already available on `PATH`.
 - Draft upload and publish-related actions require `WECHAT_APPID` and `WECHAT_SECRET`.
 - Image generation may require extra provider config in `~/.config/md2wechat/config.yaml`.
-- `convert` defaults to `api` mode unless the user explicitly asks for `--mode ai`.
+- `convert` defaults to `local` mode (offline goldmark renderer, theme `minimal-green`, includes TL;DR and chapter-takeaway rule enhancements; pass `--no-enhance` to disable). Use `--mode api` for 40+ server-rendered themes (requires `MD2WECHAT_API_KEY`), or `--mode ai` for LLM-generated HTML. Local mode also auto-resolves Obsidian `![[file.png]]` embeds.
 - Check config in this order:
   1. `~/.config/md2wechat/config.yaml`
   2. environment variables such as `MD2WECHAT_BASE_URL`

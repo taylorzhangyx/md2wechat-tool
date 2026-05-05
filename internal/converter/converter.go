@@ -17,8 +17,9 @@ import (
 type ConvertMode string
 
 const (
-	ModeAPI ConvertMode = "api" // API 模式：调用 md2wechat.cn
-	ModeAI  ConvertMode = "ai"  // AI 模式：通过 Claude 生成
+	ModeAPI   ConvertMode = "api"   // API 模式：调用 md2wechat.cn
+	ModeAI    ConvertMode = "ai"    // AI 模式：通过 Claude 生成
+	ModeLocal ConvertMode = "local" // Local 模式：本地 goldmark 渲染
 )
 
 // ImageType 图片类型
@@ -45,6 +46,11 @@ type ConvertRequest struct {
 
 	// AI 模式专用
 	CustomPrompt string // 自定义提示词
+
+	// Local 模式专用
+	BaseDir   string // Markdown 所在目录，用于解析 Obsidian 图片嵌入
+	NoEnhance bool   // 关闭规则增强（TL;DR callout / 章末 takeaway）
+	LinkStyle string // "inline"（默认，把 [text](URL) 改写成 text（URL））或 "native"
 }
 
 // ImageRef 图片引用
@@ -123,6 +129,8 @@ func (c *converter) Convert(req *ConvertRequest) *ConvertResult {
 		return c.convertViaAPI(req)
 	case ModeAI:
 		return c.convertViaAI(req)
+	case ModeLocal:
+		return c.convertViaLocal(req)
 	default:
 		result.Success = false
 		result.Status = action.StatusFailed
@@ -169,6 +177,8 @@ func (c *converter) validateRequest(req *ConvertRequest) error {
 		}
 	case ModeAI:
 		// AI 模式不需要额外验证
+	case ModeLocal:
+		// Local 模式不需要额外验证
 	}
 
 	return nil

@@ -61,3 +61,5 @@ coverage.html
 
 .cache/
 docs/superpowers/
+.env
+weixin-articles/
